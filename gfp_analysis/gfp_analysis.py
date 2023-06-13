@@ -5,7 +5,6 @@ from typing import List
 import pynecone as pc
 import asyncio
 
-
 filename = f"{config.app_name}/{config.app_name}.py"
 
 class State(pc.State):
@@ -13,6 +12,8 @@ class State(pc.State):
 
     # Whether we are currently uploading files.
     is_uploading: bool
+    files : List[pc.UploadFile] = []
+
 
     @pc.var
     def file_str(self) -> str:
@@ -25,9 +26,11 @@ class State(pc.State):
 
         # Iterate through the uploaded files.
         for file in files:
-            upload_data = await file.read()
-            outfile = pc.get_asset_path(file.filename)
+            # print("file", file) #<starlette.datastructures.UploadFile object at 0x10cf82dd0>
+            upload_data = await file.read()  #if you print this its a huge object of nonsense
+            outfile = pc.get_asset_path(file.filename) #
             with open(outfile, "wb") as file_object:
+                # print(file_object)
                 file_object.write(upload_data)
 
         # Stop the upload.
@@ -71,7 +74,8 @@ def index() -> pc.Component:
             pc.button(
                 "Upload",
                 on_click=State.handle_upload(pc.upload_files()),
-                padding="2em",
+                padding="1.5em",
+                margin_bottom="2em",
             ),
             border=f"1px solid {color}",
             ),
@@ -85,15 +89,17 @@ def index() -> pc.Component:
             pc.progress(is_indeterminate=True, color="blue", width="100%"),
             pc.progress(value=0, width="100%"),
         ),
-        pc.text_area(
-            is_disabled=True,
-            value=State.file_str,
-            width="100%",
-            height="100%",
-            bg="white",
-            color="black",
-            placeholder="No File",
-            min_height="20em",
+        pc.hstack(
+            pc.text_area(
+                is_disabled=True,
+                value=State.file_str,
+                width="100%",
+                height="100%",
+                bg="white",
+                color="black",
+                placeholder="No File",
+                min_height="20em",
+            ),
         ),
         ),
         ),
@@ -107,3 +113,9 @@ app = pc.App(state=State)
 app.add_page(index)
 app.add_page(about)
 app.compile()
+
+
+    # def process_files(self):
+    #     self.files = pc.upload_files()
+    #     print(self.files)
+    #     State.handle_upload(self.files)
