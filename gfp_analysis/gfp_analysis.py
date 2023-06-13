@@ -46,7 +46,8 @@ def index() -> pc.Component:
         pc.vstack(
         pc.vstack(
             pc.heading("GFP Analysis", font_size="2em", margin_top="0.75em"),
-                pc.upload(
+            pc.vstack(
+            pc.upload(
                     pc.button(
                             "Select File(s)",
                             height="70px",
@@ -61,29 +62,40 @@ def index() -> pc.Component:
                 pc.text(
                     "Drag and drop files here or click to select files",
                     font_size="1em", 
-                    margin_top = "0.25em"
+                    margin_top = "1em",
+                    margin_bottom = "0.25em"
                 ),
+            padding="2em",
+            text_align="center",
+            ),
             pc.button(
                 "Upload",
                 on_click=State.handle_upload(pc.upload_files()),
                 padding="2em",
-                margin_bottom = "0.5em",
-                margin_top="0.5em"
             ),
             border=f"1px solid {color}",
-            padding="2em",
-            text_align="center",
             ),
         ),
         pc.vstack(  
             pc.divider(border_color="black", margin_top = "1em", margin_bottom="1em"),
-            pc.heading("Files:"),
-            pc.cond(
-                State.is_uploading,
-                pc.progress(is_indeterminate=True, color="blue", width="100%"),
-                pc.progress(value=0, width="100%"),
-                ),
-            ),
+            
+        pc.heading("Files:"),
+        pc.cond(
+            State.is_uploading,
+            pc.progress(is_indeterminate=True, color="blue", width="100%"),
+            pc.progress(value=0, width="100%"),
+        ),
+        pc.text_area(
+            is_disabled=True,
+            value=State.file_str,
+            width="100%",
+            height="100%",
+            bg="white",
+            color="black",
+            placeholder="No File",
+            min_height="20em",
+        ),
+        ),
         ),
         )
 
