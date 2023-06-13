@@ -5,15 +5,38 @@ from typing import List
 import pynecone as pc
 import asyncio
 
+
 filename = f"{config.app_name}/{config.app_name}.py"
+color = "rgb(107,99,246)"
+
+class ForeachState(pc.State):
+    files : List[pc.UploadFile] = []
+    color: List[str] = [
+        "red",
+        "green",
+        "blue",
+        "yellow",
+        "orange",
+        "purple",
+    ]
+
+    def image_box(filename: str):
+        return pc.center(
+            pc.vstack(
+                pc.image(src=f"/{filename}.jpeg", width="100px", height="auto"),
+                pc.box(pc.text(filename), bg="white"),
+                pc.text("Lab analysis")
+            ),
+        )
+    def colored_box(color: str):
+        return pc.box(pc.text(color), bg=color)
 
 class State(pc.State):
     """The app state."""
 
     # Whether we are currently uploading files.
     is_uploading: bool
-    files : List[pc.UploadFile] = []
-
+    # files : List[pc.UploadFile] = []
 
     @pc.var
     def file_str(self) -> str:
@@ -28,21 +51,23 @@ class State(pc.State):
         for file in files:
             # print("file", file) #<starlette.datastructures.UploadFile object at 0x10cf82dd0>
             upload_data = await file.read()  #if you print this its a huge object of nonsense
-            outfile = pc.get_asset_path(file.filename) #
+            outfile = pc.get_asset_path(file.filename) 
             with open(outfile, "wb") as file_object:
                 # print(file_object)
                 file_object.write(upload_data)
 
         # Stop the upload.
         return State.stop_upload
+    
+    def process_files():
+        ForeachState.files = pc.upload_files()
+        print("files stored in :", ForeachState.files)
+        State.handle_upload(ForeachState.files)
 
     async def stop_upload(self):
         """Stop the file upload."""
         await asyncio.sleep(1)
         self.is_uploading = False
-
-color = "rgb(107,99,246)"
-
 
 def index() -> pc.Component:
     return pc.center(
@@ -73,7 +98,8 @@ def index() -> pc.Component:
             ),
             pc.button(
                 "Upload",
-                on_click=State.handle_upload(pc.upload_files()),
+                on_click = State.process_files(),
+                # on_click=State.handle_upload(pc.upload_files()),
                 padding="1.5em",
                 margin_bottom="2em",
             ),
@@ -93,17 +119,22 @@ def index() -> pc.Component:
             pc.text_area(
                 is_disabled=True,
                 value=State.file_str,
-                width="100%",
+                width="150%",
                 height="100%",
                 bg="white",
                 color="black",
                 placeholder="No File",
                 min_height="20em",
             ),
-        ),
-        ),
+            # pc.responsive_grid(
+            #     pc.foreach(ForeachState.files, ForeachState.image_box),
+            #     columns=[2, 4, 6],
+            # )
+            ),
+            ),
         ),
         )
+
 
 def about():
     return pc.text("About page!", font_size="2em")
@@ -114,8 +145,7 @@ app.add_page(index)
 app.add_page(about)
 app.compile()
 
-
-    # def process_files(self):
-    #     self.files = pc.upload_files()
-    #     print(self.files)
-    #     State.handle_upload(self.files)
+    #     pc.responsive_grid(
+    #     pc.foreach(ForeachState.color, ForeachState.colored_box),
+    #     columns=[2, 4, 6],
+    # )
