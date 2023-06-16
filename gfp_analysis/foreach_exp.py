@@ -1,4 +1,4 @@
-"""Welcome to Pynecone! This file outlines the steps to create a basic app."""
+
 from pcconfig import config
 import os
 from typing import List
@@ -7,7 +7,13 @@ import asyncio
 
 color = "rgb(107,99,246)"
 
-class ForeachState(pc.State):
+
+class State(pc.State):
+    """The app state."""
+
+    # Whether we are currently uploading files.
+    is_uploading: bool
+    
     color: List[str] = [
         "red",
         "green",
@@ -16,17 +22,6 @@ class ForeachState(pc.State):
         "orange",
         "purple",
     ]
-
-def colored_box(color: str):
-    return pc.box(pc.text(color), bg=color)
-
-class State(pc.State):
-    """The app state."""
-
-    # Whether we are currently uploading files.
-    is_uploading: bool
-    # files : List[pc.UploadFile] = []
-
     @pc.var
     def file_str(self) -> str:
         """Get the string representation of the uploaded files."""
@@ -52,11 +47,13 @@ class State(pc.State):
         """Stop the file upload."""
         await asyncio.sleep(1)
         self.is_uploading = False
+    def colored_box(color: str):
+        return pc.box(pc.text(color), bg=color)
 
 
 def index():
     return pc.responsive_grid(
-        pc.foreach(ForeachState.color, colored_box),
+        pc.foreach(State.color, colored_box),
         columns=[2, 4, 6],
     )
 
