@@ -17,7 +17,7 @@ def colored_box(color: str):
 def image_box(filename: str):
     return pc.center(
         pc.vstack(
-            pc.image(src=f"/{filename}.jpeg", width="100px", height="auto"),
+            pc.image(src=f"ex_gfp_fungi.JPG", width="100px", height="auto"),
             pc.box(pc.text(filename), bg="white"),
             pc.text("LAB color space analysis")
         ),
@@ -49,6 +49,8 @@ class State(pc.State):
     async def handle_upload(self, files: List[pc.UploadFile]):
         """Handle the file upload."""
         self.is_uploading = True
+        print("files", files)
+        print("state filestring", State.file_str())
 
         # Iterate through the uploaded files.
         for file in files:
@@ -130,8 +132,8 @@ def index():
                 placeholder="No File",
                 min_height="20em",
             ),
-            pc.responsive_grid(
-                    pc.foreach(State.color, colored_box),
+                pc.responsive_grid(
+                    pc.foreach(State.color, image_box),
                     columns=[2, 4, 6],
                 )
             ),
@@ -150,4 +152,5 @@ app.add_page(about)
 app.compile()
 
 
-#
+#ssf = solid state fermentation = spore powder
+# goal for today: be able to upload a bunch of images and render them in the grid (through a for each)
