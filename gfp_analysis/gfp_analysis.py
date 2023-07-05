@@ -23,7 +23,6 @@ class State(pc.State):
 
     # Whether we are currently uploading files.
     is_uploading: bool
-    files : List[pc.UploadFile] = [] #convert this into a list of strings
     color: List[str] = [
         "red",
         "green",
@@ -41,34 +40,25 @@ class State(pc.State):
         """Get the names of each file as a list of strings."""
         return os.listdir(pc.get_asset_path())
 
-    
+
     async def handle_upload(self, files: List[pc.UploadFile]):
-        """Handle the file upload."""
-        self.is_uploading = True
-        print("files", files)
+        """Handle the upload of file(s).
 
-        # Iterate through the uploaded files.
+        Args:
+            files: The uploaded files.
+        """
         for file in files:
-            # print("file", file) #<starlette.datastructures.UploadFile object at 0x10cf82dd0>
-            upload_data = await file.read()  #if you print this its a huge object of nonsense
-            outfile = pc.get_asset_path(file.filename) 
+            upload_data = await file.read()
+            outfile = pc.get_asset_path(file.filename)
+
+            # Save the file.
             with open(outfile, "wb") as file_object:
-                # print(file_object)
                 file_object.write(upload_data)
-
-        # Stop the upload.
-        return State.stop_upload
-
+    
     async def stop_upload(self):
         """Stop the file upload."""
         await asyncio.sleep(1)
         self.is_uploading = False
-
-    async def process_files(self): #self is being passed in as State
-        self.files = pc.upload_files()
-        print("files stored in :", self.files)
-        asyncio.run(self.handle_upload(self.files))
-        
 
 def index():
     return pc.center(
@@ -99,8 +89,7 @@ def index():
             ),
             pc.button(
                 "Upload",
-                # on_click = State.process_files(),
-                on_click=State.handle_upload(pc.upload_files()),
+                on_click=lambda: State.handle_upload(pc.upload_files()),
                 padding="1.5em",
                 margin_bottom="2em",
             ),
@@ -140,11 +129,12 @@ def index():
 def about():
     return pc.text("About page!", font_size="2em")
 
+
 # Add state and page to the app.
 app = pc.App(state=State)
 app.add_page(index)
 app.add_page(about)
 app.compile()
 
-#can upload images, want the foreach to go through the uploaded images. YESSSSS DONE. 
+#be able to upload image without it crashing
 
