@@ -8,19 +8,14 @@ import asyncio
 filename = f"{config.app_name}/{config.app_name}.py"
 color = "rgb(107,99,246)"
 
-def colored_box(color: str): 
-        ''' for some reason, must be defined outside of the state. 
-        recieves 'EventSpec' object has no attribute 'key' if not. '''
-        return pc.hstack(
-            pc.box(pc.text(color), bg=color, padding = "0.1em"),
-            pc.spacer())
 def image_box(filename: str):
     return pc.center(
         pc.vstack(
-            pc.image(src=f"ex_gfp_fungi.JPG", width="100px", height="auto"),
+            pc.image(src=filename, width="120px", height="auto"), #so far hardcoded, in the for each need to add path for image
             pc.box(pc.text(filename), bg="white"),
             pc.text("LAB color space analysis")
         ),
+        padding="2em",
     )
 
 class State(pc.State):
@@ -28,29 +23,29 @@ class State(pc.State):
 
     # Whether we are currently uploading files.
     is_uploading: bool
-    files : List[pc.UploadFile] = []
+    files : List[pc.UploadFile] = [] #convert this into a list of strings
     color: List[str] = [
         "red",
         "green",
         "blue",
         "yellow",
-        "orange",
-        "purple",
-        "pink",
-        "orange",
-        "blue",
     ]
 
     @pc.var
     def file_str(self) -> str:
         """Get the string representation of the uploaded files."""
         return "\n".join(os.listdir(pc.get_asset_path()))
+
+    @pc.var
+    def file_list(self) -> str:
+        """Get the names of each file as a list of strings."""
+        return os.listdir(pc.get_asset_path())
+
     
     async def handle_upload(self, files: List[pc.UploadFile]):
         """Handle the file upload."""
         self.is_uploading = True
         print("files", files)
-        print("state filestring", State.file_str())
 
         # Iterate through the uploaded files.
         for file in files:
@@ -104,8 +99,8 @@ def index():
             ),
             pc.button(
                 "Upload",
-                on_click = State.process_files(),
-                # on_click=State.handle_upload(pc.upload_files()),
+                # on_click = State.process_files(),
+                on_click=State.handle_upload(pc.upload_files()),
                 padding="1.5em",
                 margin_bottom="2em",
             ),
@@ -133,7 +128,7 @@ def index():
                 min_height="20em",
             ),
                 pc.responsive_grid(
-                    pc.foreach(State.color, image_box),
+                    pc.foreach(State.file_list, image_box),
                     columns=[2, 4, 6],
                 )
             ),
@@ -151,6 +146,5 @@ app.add_page(index)
 app.add_page(about)
 app.compile()
 
+#can upload images, want the foreach to go through the uploaded images. YESSSSS DONE. 
 
-#ssf = solid state fermentation = spore powder
-# goal for today: be able to upload a bunch of images and render them in the grid (through a for each)
