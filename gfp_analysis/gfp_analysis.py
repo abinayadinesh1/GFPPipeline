@@ -14,6 +14,7 @@ def image_box(filename: str):
             pc.image(src=filename, width="120px", height="auto"), #so far hardcoded, in the for each need to add path for image
             pc.box(pc.text(filename), bg="white"),
             pc.text("LAB color space analysis")
+            
         ),
         padding="2em",
     )
